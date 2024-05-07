@@ -103,5 +103,5 @@ class ItemGenerator:
             "content": f"ITEM NAME: {item_name}"
         }
         messages = [system_message, user_message]
-        return call_gpt_4_turbo(messages)
+        return call_dbrx(messages)
     

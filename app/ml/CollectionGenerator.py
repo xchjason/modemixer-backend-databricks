@@ -43,7 +43,7 @@ class CollectionGenerator:
                 "content": f"COLLECTION DESCRIPTION: {collection_description}"
             }
         ]
-        result = call_gpt_4_turbo(messages)
+        result = call_dbrx(messages)
         return result.split(", ")
     
     @staticmethod
@@ -69,7 +69,7 @@ class CollectionGenerator:
             "content": f"COLLECTION NAME: {collection_name}"
         }
         messages = [system_message, user_message]
-        return call_gpt_4_turbo(messages)
+        return call_dbrx(messages)
 
     @staticmethod
     def item_description_chain(item_name: str, gender: str):
@@ -91,7 +91,7 @@ class CollectionGenerator:
             "content": f"ITEM NAME: {item_name}"
         }
         messages = [system_message, user_message]
-        return call_gpt_4_turbo(messages)
+        return call_dbrx(messages)
 
     @staticmethod
     def generate_full_collection(collection_description: str):
