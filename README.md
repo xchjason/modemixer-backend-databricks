@@ -1,7 +1,6 @@
-# ModeMixer Backend
+# Databricks ModeMixer Backend
 
-The **ModeMixer Backend** provides a FastAPI-based RESTful API that serves as the backbone for the ModeMixer web application. It powers AI-driven fashion design pipelines by interacting with OpenAI models, MongoDB, and other components.
-
+The **ModeMixer Backend** provides a FastAPI-based RESTful API that serves as the backbone for the ModeMixer web application. It powers AI-driven fashion design pipelines by interacting with OpenAI models, MongoDB, and other components. **Note** this is our Databricks backend. It is forked from another of our repos built at the same time for Microsoft Azure Hackathon. It is all our work and was built during the timeframe of the hackathon. In this project we switched our language models to dbrx which greatly improved the speed of our inference.
 
 - [How To Run API](#run-instruct)
 - [Tech Stack](#tech-stack)
