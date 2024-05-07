@@ -3,7 +3,7 @@ from openai import APIError, RateLimitError, OpenAIError
 from fastapi import HTTPException
 import os
 import random
-from .utils.dbrx_model import call_dbrx
+from .utils.models import call_dbrx, call_gpt_4_turbo
 from .utils.webscaper import process_and_upload_image
 from .ItemGenerator import ItemGenerator
 
@@ -20,7 +20,7 @@ class CollectionGenerator:
         return client
 
     @staticmethod
-    def generate_collection_items(collection_name: str):
+    def generate_collection_items(collection_description: str):
         """ Generate a list of items for a given collection name. """
         messages=[
             {
@@ -40,10 +40,10 @@ class CollectionGenerator:
             },
             {
                 "role": "user",
-                "content": f"COLLECTION NAME: {collection_name}"
+                "content": f"COLLECTION DESCRIPTION: {collection_description}"
             }
         ]
-        result = call_dbrx(messages)
+        result = call_gpt_4_turbo(messages)
         return result.split(", ")
     
     @staticmethod
@@ -69,7 +69,7 @@ class CollectionGenerator:
             "content": f"COLLECTION NAME: {collection_name}"
         }
         messages = [system_message, user_message]
-        return call_dbrx(messages)
+        return call_gpt_4_turbo(messages)
 
     @staticmethod
     def item_description_chain(item_name: str, gender: str):
@@ -91,20 +91,21 @@ class CollectionGenerator:
             "content": f"ITEM NAME: {item_name}"
         }
         messages = [system_message, user_message]
-        return call_dbrx(messages)
+        return call_gpt_4_turbo(messages)
 
     @staticmethod
-    def generate_full_collection(collection_name: str):
+    def generate_full_collection(collection_description: str):
         """ Generate descriptions for each item in a collection. """
-        items = CollectionGenerator.generate_collection_items(collection_name)
+        items = CollectionGenerator.generate_collection_items(collection_description)
         return_arr = []
         for item_name in items:
             gender_options = ["male", "female"]
             gender = random.choice(gender_options)
-            item_desc = ItemGenerator.item_description_chain(item_name, gender)
+            item_desc = ItemGenerator.item_description_chain(item_name, gender, collection_description)
             return_arr.append({
                 "item_name": item_name,
-                "item_description": item_desc
+                "item_description": item_desc,
+                "womanswear": True if gender == "female" else False
             })
         return return_arr
     
@@ -116,7 +117,6 @@ class CollectionGenerator:
         if len(prompt) > 3900:
             start = len(prompt) - 3900
             prompt = prompt[start:]
-        print(prompt[len(prompt) - 500:])
         try:
             response = client.images.generate(
                 model="dall-e-3",

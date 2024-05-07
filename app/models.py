@@ -40,7 +40,11 @@ class ItemModel(BaseModel):
     image_urls: List[str] = []
     collection: str = None
     created_at: datetime = datetime.now()
+    techpack_url: Optional[str] = None
     id: Optional[str] = None
+
+class ItemDescription(BaseModel):
+    description: str
 
 class ItemReference(BaseModel):
     title: str
@@ -50,6 +54,7 @@ class ItemReference(BaseModel):
     image_urls: List[str] = []
     collection: str = None
     created_at: datetime = datetime.now()
+    techpack_url: Optional[str] = None
     id: str = None
 
 class FashionReferences(BaseModel):
