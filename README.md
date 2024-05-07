@@ -14,8 +14,7 @@ The **ModeMixer Backend** provides a FastAPI-based RESTful API that serves as th
 ## Tech Stack
 - **Framework:** FastAPI
 - **Database:** MongoDB
-- **AI Models:** Azure OpenAI Service (GPT, DALL-E)
-- **Deployment:** Azure App Service
+- **AI Models:** DBRX, DALLE-3, GPT-4-V
 
 ## Responsible AI Principles
 
