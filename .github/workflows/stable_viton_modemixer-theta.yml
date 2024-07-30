@@ -33,7 +33,8 @@ jobs:
       - name: Create startup command
         run: |
           echo '#!/bin/bash' > startup.sh
-          echo 'uvicorn app.main:app --host 0.0.0.0 --port 80' >> startup.sh
+          echo 'cd /home/site/wwwroot' >> startup.sh
+          echo 'gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:80' >> startup.sh
           chmod +x startup.sh
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -57,15 +58,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
-
       - name: Unzip artifact for deployment
         run: unzip release.zip
-
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: "Deploy to Azure Web App"
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
@@ -73,7 +71,6 @@ jobs:
           app-name: "modemixer-theta"
           slot-name: "production"
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_5414ec0945ea43ea80a8b419744258f6 }}
-
       - name: Configure Web App settings
         uses: azure/appservice-settings@v1
         with:
@@ -95,5 +92,9 @@ jobs:
               {
                 "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
                 "value": "1"
+              },
+              {
+                "name": "STARTUP_COMMAND",
+                "value": "/home/site/wwwroot/startup.sh"
               }
             ]
