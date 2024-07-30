@@ -31,17 +31,17 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install system dependencies
+      - name: Install system dependencies and wkhtmltopdf
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc python3-dev wget xfonts-75dpi xfonts-base
-          wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
-          sudo dpkg -i wkhtmltox_0.12.6-1.buster_amd64.deb || sudo apt-get install -f -y
+          sudo apt-get install -y wget xfonts-75dpi xfonts-base fontconfig libxrender1 xz-utils
+          wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.buster_amd64.deb
+          sudo apt-get install -y ./wkhtmltox-0.12.6-1.buster_amd64.deb
 
       - name: Create startup command
         run: |
