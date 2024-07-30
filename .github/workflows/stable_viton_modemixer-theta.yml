@@ -13,10 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python version
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Create and start virtual environment
         run: |
@@ -34,7 +42,6 @@ jobs:
           sudo apt-get install -y gcc python3-dev wget xfonts-75dpi xfonts-base
           wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
           sudo dpkg -i wkhtmltox_0.12.6-1.buster_amd64.deb || sudo apt-get install -f -y
-          sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* /wkhtmltox_0.12.6-1.buster_amd64.deb
 
       - name: Create startup command
         run: |
@@ -43,15 +50,13 @@ jobs:
           chmod +x startup.sh
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip -r release.zip . -x "venv/*"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -74,7 +79,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "Deploy to Azure Web App"
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
@@ -94,14 +99,6 @@ jobs:
               },
               {
                 "name": "WEBSITE_RUN_FROM_PACKAGE",
-                "value": "1"
-              },
-              {
-                "name": "WEBSITES_CONTAINER_START_TIME_LIMIT",
-                "value": "1800"
-              },
-              {
-                "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
                 "value": "1"
               }
             ]
