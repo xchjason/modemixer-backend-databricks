@@ -44,36 +44,20 @@ jobs:
           set -e
           set -x
           cd /home/site/wwwroot
-          if [ ! -d "antenv" ]; then
-              echo "Creating virtual environment..."
-              python3.10 -m venv antenv
-          fi
           source antenv/bin/activate
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-              pip install -r requirements.txt
-          else
-              echo "No requirements.txt found. Skipping dependency installation."
-          fi
-          pip install gunicorn
-          if [ ! -f "app/main.py" ]; then
-              echo "Error: app/main.py not found!"
-              exit 1
-          fi
-          exec gunicorn app.main:app --bind=0.0.0.0:80 --workers=4 --worker-class=uvicorn.workers.UvicornWorker --timeout 600 --access-logfile='-' --error-logfile='-'
+          exec gunicorn app.main:app --bind=0.0.0.0:8000 --workers=4 --worker-class=uvicorn.workers.UvicornWorker --timeout 600 --access-logfile='-' --error-logfile='-'
           EOL
           chmod +x startup.sh
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      - name: Create deployment package
+        run: |
+          zip -r package.zip . -x "*.git*" "*.github*" "*.vscode*" "antenv/*"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !antenv/
+          path: package.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -88,9 +72,6 @@ jobs:
         with:
           name: python-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -103,6 +84,7 @@ jobs:
           app-name: "modemixer-theta"
           slot-name: "production"
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_5414ec0945ea43ea80a8b419744258f6 }}
+          package: package.zip
 
       - name: Configure Web App settings
         uses: azure/appservice-settings@v1
@@ -116,11 +98,11 @@ jobs:
               },
               {
                 "name": "WEBSITE_RUN_FROM_PACKAGE",
-                "value": "0"
+                "value": "1"
               },
               {
-                "name": "PYTHON_ENV",
-                "value": "production"
+                "name": "WEBSITES_PORT",
+                "value": "8000"
               },
               {
                 "name": "STARTUP_COMMAND",
